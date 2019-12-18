@@ -18,8 +18,8 @@ export default [
     component: () => import("@/views/about")
   },
   {
-    path: "/demo",
-    name: "demo",
-    component: () => import("@/views/demo")
+    path: "/study",
+    name: "study",
+    component: () => import("@/views/study")
   }
 ];

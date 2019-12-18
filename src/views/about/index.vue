@@ -12,41 +12,36 @@
         <th>操作</th>
       </tr>
       <tr v-for="(user, index) of userList" :key="user.id">
-        <td>{{user.name}}</td>
-        <td>{{user.nickName}}</td>
+        <td>{{ user.name }}</td>
+        <td>{{ user.nickName }}</td>
         <td>
-          <span class="tag" v-for="(skill, skillIndex) in user.skill" :key="skillIndex">{{skill}}</span>
+          <span
+            class="tag"
+            v-for="(skill, skillIndex) in user.skill"
+            :key="skillIndex"
+            >{{ skill }}</span
+          >
         </td>
         <td>
           <a href="javascript:;" @click="editUser(user, index)">编辑</a>
+          |
           <a href="javascript:;" @click="deleteUser(index)">删除</a>
         </td>
       </tr>
     </table>
-    <div class="modal" v-show="isShow">
-      <form class="form">
-        <label class="form-item">
-          <span class="label-text">姓名：</span>
-          <input type="text" class="form-input" v-model="modelData.name" />
-        </label>
-        <label class="form-item">
-          <span class="label-text">外号：</span>
-          <input type="text" class="form-input" v-model="modelData.nickName" />
-        </label>
-        <label class="form-item">
-          <span class="label-text">技能：</span>
-          <textarea v-model="skill" placeholder="多个技能之间用回车隔开" rows="4" class="form-input textarea" />
-        </label>
-        <div class="form-item text-center">
-          <input type="button" value="提交" class="btn btn_blue" @click="submit" />
-          <input type="button" value="取消" class="btn btn_gray" @click="cancel" />
-        </div>
-      </form>
-    </div>
+
+    <modal
+      v-if="isShow"
+      :data="modelData"
+      @on-submit="submit"
+      @on-cancel="cancel"
+    >
+    </modal>
   </div>
 </template>
 
 <script>
+import modal from "_com/modal.vue";
 export default {
   name: "about",
   data() {
@@ -98,28 +93,17 @@ export default {
       this.modelData = {};
       this.userIndex = -1;
     },
-    submit() {
-      const { name, nickName, skill } = this.modelData;
-      if (!name) {
-        alert("请输入姓名");
-        return;
-      } else if (!nickName) {
-        alert("请输入外号");
-        return;
-      } else if (!skill || !skill.join('')) {
-        alert("请输入技能");
-        return;
-      }
+    submit(data) {
       if (this.userIndex === -1) {
         //新增
-        this.modelData = {
-            ...this.modelData,
-            id: Date.now()
-        }
-        this.userList.unshift(this.modelData);
+        data = {
+          ...data,
+          id: Date.now()
+        };
+        this.userList.unshift(data);
         this.cancel();
       } else {
-        this.userList.splice(this.userIndex, 1, this.modelData);
+        this.userList.splice(this.userIndex, 1, data);
         this.cancel();
       }
     },
@@ -127,20 +111,9 @@ export default {
       this.isShow = true;
     }
   },
-  computed: {
-    skill: {
-      get() {
-        return this.modelData.skill ? this.modelData.skill.join("\n") : "";
-      },
-      set(val) {
-        let skill = val.split("\n");
-        this.modelData = {
-          ...this.modelData,
-          skill
-        };
-        console.log(this.modelData);
-      }
-    }
+
+  components: {
+    modal
   }
 };
 </script>
@@ -167,43 +140,25 @@ export default {
     background: #e0e0e0;
   }
 }
-.form {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  background: #fff;
-  padding: 16px;
-  border-radius: 8px;
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  th {
+    background: #eee;
+  }
+  th,
+  td {
+    padding: 8px 0;
+    border: 1px solid #ccc;
+  }
 }
-.form-item {
-  display: block;
-  text-align: left;
-  margin-top: 10px;
-  &.text-center {
-    text-align: center;
-  }
-  .label-text {
-    margin-right: 8px;
-    line-height: 32px;
-    font-size: 14px;
-  }
-  .form-input {
-      width: 240px;
-      padding: 0 8px;
-      background: #fff;
-      border: 1px solid #d0d0d0;
-      border-radius: 4px;
-      height: 32px;
-      line-height: 1.8;
-      font-size: 14px;
-      vertical-align: top;
-      &.textarea {
-          height: auto;
-      }
-  }
-  .btn {
-      margin: 0 4px;
-  }
+.tag {
+  display: inline-block;
+  padding: 0 8px;
+  line-height: 1.5;
+  background: #f0f0f0;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  margin: 4px;
 }
 </style>
