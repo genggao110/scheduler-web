@@ -19,5 +19,18 @@ module.exports = {
     config.resolve.alias
       .set("@", resolve("src"))
       .set("_com", resolve("src/components"));
+  },
+  devServer: {
+    host: "0.0.0.0",
+    proxy: {
+      "/api": {
+        target: "http://localhost:8090",
+        ws: true,
+        changeOrigin: true,
+        pathRwrite: {
+          "^/api": ""
+        }
+      }
+    }
   }
 };

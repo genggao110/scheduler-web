@@ -10,16 +10,41 @@ export default [
   {
     path: "/",
     name: "home",
+    meta: {
+      title: "Scheduler-web"
+    },
     component: () => import("@/views/home")
   },
   {
     path: "/about",
     name: "about",
+    meta: {
+      title: "About"
+    },
     component: () => import("@/views/about")
   },
   {
     path: "/study",
     name: "study",
+    meta: {
+      title: "Study"
+    },
     component: () => import("@/views/study")
+  },
+  {
+    path: "/login",
+    name: "login",
+    meta: {
+      title: "Login"
+    },
+    component: () => import("@/views/login")
+  },
+  {
+    path: "/register",
+    name: "register",
+    meta: {
+      title: "Register"
+    },
+    component: () => import("@/views/register")
   }
 ];

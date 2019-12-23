@@ -30,18 +30,18 @@
       </tr>
     </table>
 
-    <modal
+    <modals
       v-if="isShow"
       :data="modelData"
       @on-submit="submit"
       @on-cancel="cancel"
     >
-    </modal>
+    </modals>
   </div>
 </template>
 
 <script>
-import modal from "_com/modal.vue";
+import modals from "_com/modal.vue";
 export default {
   name: "about",
   data() {
@@ -113,7 +113,7 @@ export default {
   },
 
   components: {
-    modal
+    modals
   }
 };
 </script>
