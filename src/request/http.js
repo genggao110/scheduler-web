@@ -28,7 +28,7 @@ axiosInstance.interceptors.request.use(
     if (error.config.loading == true) {
       Loading.service().close();
     }
-    return Promise.reject(error);
+    return Promise.error(error);
   }
 );
 
@@ -41,9 +41,10 @@ axiosInstance.interceptors.response.use(
     if (
       res.data.code == -4 || //NO_TNO_TOKENOKEN
       res.data.code == -5 || //TOKEN_WRONG
-      res.data.code == -6 // USER_PASSWORD_NOT_MATCH
+      res.data.code == -6 || // USER_PASSWORD_NOT_MATCH
+      res.data.code == -11 // TOKEN_EXPIRED
     ) {
-      store.dispatch("Login/handleLogOut");
+      store.dispatch("User/handleLogOut");
       router.push({
         name: "login"
       });
@@ -52,14 +53,15 @@ axiosInstance.interceptors.response.use(
     if (res.data.code < 0) {
       throw new ResError(res.data.msg);
     }
-    return res.data.data;
+    return Promise.resolve(res.data.data);
   },
   error => {
     //后台未捕获的错误
     if (error.config.loading == true) {
       Loading.service.close();
     }
-    throw new ResError("请求服务器失败，请检查服务器是否正常运行");
+    //throw new ResError("请求服务器失败，请检查服务器是否正常运行");
+    return Promise.reject("请求服务器失败，请检查服务器是否正常运行");
   }
 );
 

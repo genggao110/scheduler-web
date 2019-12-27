@@ -13,15 +13,21 @@ export default [
     meta: {
       title: "Scheduler-web"
     },
-    component: () => import("@/views/home")
-  },
-  {
-    path: "/about",
-    name: "about",
-    meta: {
-      title: "About"
-    },
-    component: () => import("@/views/about")
+    component: () => import("@/views/home"),
+    children: [
+      {
+        path: "",
+        redirect: "home"
+      },
+      {
+        path: "home",
+        name: "Home",
+        meta: {
+          title: "首页"
+        },
+        component: () => import("@/views/about")
+      }
+    ]
   },
   {
     path: "/study",
@@ -46,5 +52,13 @@ export default [
       title: "Register"
     },
     component: () => import("@/views/register")
+  },
+  {
+    path: "/reset",
+    name: "reset",
+    meta: {
+      title: "Reset_Password"
+    },
+    component: () => import("@/views/reset")
   }
 ];

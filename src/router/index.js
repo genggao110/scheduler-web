@@ -13,6 +13,7 @@ Vue.use(VueRouter);
 
 const LOGIN_PAGE_NAME = "login";
 const REGISTER_PAGE_NAME = "register";
+const RESET_PAGE_NAME = "reset";
 
 const router = new VueRouter({
   //使用什么方式切换路由
@@ -31,8 +32,8 @@ router.beforeEach((to, from, next) => {
   //默认token存在
   const token = localStorage.getItem("token");
 
-  //如果要跳转的是用户注册页面，直接跳转
-  if (to.name === REGISTER_PAGE_NAME) {
+  //如果要跳转的是用户注册或者重置密码页面，直接跳转
+  if (to.name === REGISTER_PAGE_NAME || to.name === RESET_PAGE_NAME) {
     next();
   } else {
     if (!token && to.name !== LOGIN_PAGE_NAME) {

@@ -24,20 +24,27 @@
         </el-form-item>
         <el-form-item prop="email">
           <label for="register_email" aria-autocomplete="false">Email</label>
-          <el-input v-model="registerForm.email"></el-input>
+          <el-input v-model="registerForm.email" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item prop="password">
           <label for="register_password">Password</label>
-          <el-input type="password" v-model="registerForm.password" auto-complete="off" @input="contentRefresh(registerForm.password)"></el-input>
+          <el-input
+            type="password"
+            v-model="registerForm.password"
+            auto-complete="off"
+            @input="contentRefresh(registerForm.password)"
+            show-password
+          ></el-input>
         </el-form-item>
-        <p
-            class="form-control-note text-gray-dark"
-          >Make sure it's 
-          <span :class="[attentionStyle.total ? 'active' : 'normal']"> at least 8 characters </span>
-          <span :class="[attentionStyle.number ? 'active' : 'normal']">including a number, </span> 
-          <span :class="[attentionStyle.upper ? 'active' : 'normal']">a uppercase letter </span>
+        <p class="form-control-note text-gray-dark">
+          Make sure it's
+          <span
+            :class="[attentionStyle.total ? 'active' : 'normal']"
+          >at least 8 characters</span>
+          <span :class="[attentionStyle.number ? 'active' : 'normal']">including a number,</span>
+          <span :class="[attentionStyle.upper ? 'active' : 'normal']">a uppercase letter</span>
           <span :class="[attentionStyle.lower ? 'active' : 'normal']">and a lowercase letter.</span>
-          </p>
+        </p>
         <el-button
           class="signUpButton"
           type="success"
@@ -49,17 +56,30 @@
 </template>
 
 <script>
-import { post } from "@/request/http.js";
+import { post, get } from "@/request/http.js";
 import md5 from "js-md5";
+import utils from "@/utils/validate.js";
+import config from "@/config";
 export default {
   name: "register",
   data() {
     var validUsername = (rule, value, callback) => {
       if (value === "") {
         return callback(new Error("please input the userName"));
-      } else {
-        return callback();
       }
+      get(`/user/validate?name=${value}`)
+        .then(res => {
+            if (!res) {
+              return callback(
+                new Error("Username " + value + " is not available")
+              );
+            } else {
+              return callback();
+            }
+        })
+        .catch(error => {
+          console.log("失败的原因是" + error.data);
+        });
     };
     var validPassword = (rule, value, callback) => {
       //至少8个字符包含一个数字和一个小写字母
@@ -102,10 +122,10 @@ export default {
         ]
       },
       attentionStyle: {
-          total: false,
-          number: false,
-          upper: false,
-          lower: false
+        total: false,
+        number: false,
+        upper: false,
+        lower: false
       }
     };
   },
@@ -119,34 +139,35 @@ export default {
         }
       });
     },
-    async register() {
-      try {
-        //密码进行md5加密
-        let form = new FormData();
-        form.append("name", this.registerForm.name);
-        form.append("password", md5(this.registerForm.password));
-        form.append("email", this.registerForm.email);
-        let token = await post("/user/register", form);
-        this.$store.dispatch("User/handleLogIn", {
-          name: this.registerForm.name,
-          token: token
-        });
-        //测试，先跳转到about页面，主页逻辑还有问题
-        this.$message({
+    register() {
+      //密码进行md5加密
+      let form = new FormData();
+      form.append("name", this.registerForm.name);
+      form.append("password", md5(this.registerForm.password));
+      form.append("email", this.registerForm.email);
+      post("/user/register", form)
+        .then(token => {
+          this.$store.dispatch("User/handleLogIn", {
+            name: this.registerForm.name,
+            token: token
+          });
+          //测试，先跳转到about页面，主页逻辑还有问题
+          this.$message({
             message: "Login Success, Jump to Home Page",
-            type: 'success'
-        });
-        this.$router.push({ name: "about"});
-      } catch (error){
+            type: "success"
+          });
+          this.$router.push({ name: "about" });
+        })
+        .catch(err => {
           this.$throw(error);
-      }
+        });
     },
-    contentRefresh (value) {
-        //针对输入的数据进行正则匹配，从而设定不同的css样式
-        this.attentionStyle.total = value.length >= 8 ? true : false;
-        this.attentionStyle.number = /\d/.test(value) ? true : false;
-        this.attentionStyle.lower = /[a-z]/.test(value) ? true : false;
-        this.attentionStyle.upper = /[A-Z]/.test(value) ? true : false;
+    contentRefresh(value) {
+      //针对输入的数据进行正则匹配，从而设定不同的css样式
+      this.attentionStyle.total = value.length >= 8 ? true : false;
+      this.attentionStyle.number = /\d/.test(value) ? true : false;
+      this.attentionStyle.lower = /[a-z]/.test(value) ? true : false;
+      this.attentionStyle.upper = /[A-Z]/.test(value) ? true : false;
     }
   }
 };
@@ -175,9 +196,9 @@ export default {
   font-family: Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica,
     Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
   font-weight: 500;
-  color: #fff!important;
-  margin: .67em 0;
-  font-size: 48px!important;
+  color: #fff !important;
+  margin: 0.67em 0;
+  font-size: 48px !important;
 }
 
 .lead-mtkg {
@@ -185,10 +206,10 @@ export default {
   font-weight: 400;
   font-family: Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica,
     Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
-  margin-bottom: 24px!important;
+  margin-bottom: 24px !important;
   display: block;
-  text-align: center!important;
-  color: hsla(0, 0%, 100%, .6);
+  text-align: center !important;
+  color: hsla(0, 0%, 100%, 0.6);
   line-height: 1.5;
 }
 
@@ -208,36 +229,37 @@ export default {
 }
 
 .register-panel {
-    margin-bottom: 8%;
-    margin-top: 3%;
-    width: 30%;
+  margin-bottom: 8%;
+  margin-top: 3%;
+  width: 30%;
 }
 
 .form-control-note {
-    margin-top: 5px;
-    font-size: 12px;
-    display: block;
-    font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
-    line-height: 1.5;
+  margin-top: 5px;
+  font-size: 12px;
+  display: block;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial,
+    sans-serif, Apple Color Emoji, Segoe UI Emoji;
+  line-height: 1.5;
 }
 
 .text-gray-dark {
-    color: #24292e!important;
+  color: #24292e !important;
 }
 
 .normal {
-    color: #cb2431!important;
-    font-weight:600!important;
+  color: #cb2431 !important;
+  font-weight: 600 !important;
 }
 
 .active {
-    color:#28a745!important;
+  color: #28a745 !important;
 }
 
 .signUpButton {
-    width: 100%;
-    background-color: #2ebc4f;
-    border-color: #2ebc4f;
-    padding: 20px 32px;
+  width: 100%;
+  background-color: #2ebc4f;
+  border-color: #2ebc4f;
+  padding: 20px 32px;
 }
 </style>

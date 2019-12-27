@@ -21,17 +21,21 @@
         <el-card shadow="always" class="signCard">
           <el-form :model="formItem">
             <el-form-item>
-              <label for="login_field">Username or email address</label>
+              <label for="login_field">Username or Email address</label>
               <el-input v-model="formItem.name"></el-input>
             </el-form-item>
             <el-form-item>
               <label for="password">
-                password
-                <a href="javascript:;">Forgot password?</a>
+                Password
+                <a href="javascript:;" @click="reset">Forgot password?</a>
               </label>
-              <el-input v-model="formItem.password" type="password"></el-input>
+              <el-input v-model="formItem.password" type="password" show-password></el-input>
             </el-form-item>
-            <V5Button name="v5" host="freetvks2vi2.verify5.com" token="b31a30f2ea8d4da19e7ae83b778c4433"></V5Button>
+            <V5Button
+              name="v5"
+              host="freetvks2vi2.verify5.com"
+              token="b31a30f2ea8d4da19e7ae83b778c4433"
+            ></V5Button>
             <el-button class="signInButton" type="success" @click="login">Sign in</el-button>
           </el-form>
         </el-card>
@@ -60,45 +64,49 @@ export default {
   },
   methods: {
     //进行登录
-    async login() {
-      try {
+    login() {
         let form = new FormData();
         form.append("name", this.formItem.name);
         form.append("password", md5(this.formItem.password));
-        let response = await post("/user/login", form);
-        let token = response.Authorization;
-        this.$store.dispatch('User/handleLogIn', {
+        post("/user/login", form).then(response => {
+          let token = response.Authorization;
+          this.$store.dispatch("User/handleLogIn", {
             name: this.formItem.name,
-            token: token
-        });
-        let redirect = decodeURIComponent(this.$route.query.redirect || "/");
-        if (redirect != undefined) {
+            token: token,
+            userInfo: response.userInfo
+          });
+          let redirect = decodeURIComponent(this.$route.query.redirect || "/");
+          if (redirect != undefined) {
             this.$message({
               message: "Login Success",
-              type: 'success'
+              type: "success"
             });
             this.$router.push({
-                path: redirect
+              path: redirect
             });
-        } else {
+          } else {
             //测试，先跳转到about页面，主页逻辑还有问题
-            this.$router.push({ name: "about"});
-        }
-      } catch (error) {
-          this.$throw(error);
-      }
+            this.$router.push({ name: "about" });
+          }
+        })
+        .catch (err => {
+          this.$throw(err);
+        })
     },
 
     validation() {
       //TODO 自定义校验规则
     },
 
-    register () {
-      this.$router.push({ name: "register"});
+    register() {
+      this.$router.push({ name: "register" });
+    },
+    reset() {
+      this.$router.push({ name: "reset" });
     }
   },
   components: {
-      V5Button
+    V5Button
   }
 };
 </script>
@@ -109,10 +117,10 @@ export default {
 }
 
 .body {
-    width: 100%;
-    height: 100%;
-    background: #eee;
-    position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #eee;
+  position: absolute;
 }
 
 .login {
